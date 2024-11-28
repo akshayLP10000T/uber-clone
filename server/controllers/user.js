@@ -2,6 +2,7 @@ import { validationResult } from "express-validator";
 import { User } from "../models/user.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { BlackListTokens } from "../models/blackListToken.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -35,9 +36,15 @@ export const registerUser = async (req, res) => {
 
     const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY);
 
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
     return res.status(201).json({
       token,
-      message: "Account created successfully, login to continue",
+      message: "Account created successfully",
     });
   } catch (error) {
     return res.status(500).json({
@@ -60,7 +67,7 @@ export const loginUser = async (req, res) => {
 
     let user = await User.findOne({ email });
 
-    if(!user){
+    if (!user) {
       return res.status(401).json({
         message: "Invalid email or password",
       });
@@ -81,6 +88,12 @@ export const loginUser = async (req, res) => {
 
     const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY);
 
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
     return res.status(200).json({
       message: `Welcome back ${
         user?.fullName?.firstName + " " + user?.fullName?.lastName
@@ -89,10 +102,29 @@ export const loginUser = async (req, res) => {
       token,
     });
   } catch (error) {
-    console.log(error);
-
     return res.status(500).json({
       message: "Some error occure while logging to your account",
     });
   }
+};
+
+export const getUserProfile = async (req, res) => {
+  try {
+    return res.status(200).json(req.user);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Some error occured while trying to get your data",
+    });
+  }
+};
+
+export const logOutUser = async (req, res) => {
+  res.clearCookie("token");
+
+  const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+  await BlackListTokens.create({ token });
+
+  return res.status(200).json({
+    message: "Logged Out",
+  });
 };
