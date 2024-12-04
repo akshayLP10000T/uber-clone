@@ -1,7 +1,7 @@
 import { Driver } from "../models/driver.js";
 import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator";
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 import { BlackListTokens } from "../models/blackListToken.js";
 
 export const registerDriver = async (req, res) => {
@@ -19,10 +19,10 @@ export const registerDriver = async (req, res) => {
       lastName,
       email,
       password,
-      color,
-      plate,
-      capacity,
+      vehicleCapacity,
       vehicleType,
+      vehiclePlate,
+      vehicleColor,
     } = req.body;
 
     let user = await Driver.findOne({ email });
@@ -42,10 +42,10 @@ export const registerDriver = async (req, res) => {
       email,
       password: hashedPassword,
       vehicle: {
-        color,
-        plate,
-        capacity,
+        color: vehicleColor,
         vehicleType,
+        plate: vehiclePlate,
+        capacity: vehicleCapacity,
       },
     });
 
@@ -107,6 +107,8 @@ export const loginDriver = async (req, res) => {
 
     const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY);
 
+    await BlackListTokens.deleteOne({ token });
+
     res.cookie("token", token, {
       httpOnly: true,
       sameSite: "strict",
@@ -122,7 +124,7 @@ export const loginDriver = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      message: "Some error occure while logging to your account",
+      message: "Some error occur while logging to your account",
     });
   }
 };

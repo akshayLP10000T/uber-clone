@@ -20,11 +20,11 @@ router.post(
     body("password")
       .isLength({ min: 6 })
       .withMessage("Password should be of atleast 6 characters"),
-    body("color")
+    body("vehicleColor")
       .isLength({ min: 3 })
       .withMessage("Color must be at least 3 characters"),
-    body("plate").isLength({ min: 3 }).withMessage("Invalid Plate Number"),
-    body("capacity").isLength({ min: 1 }).withMessage("Invalid Capacity"),
+    body("vehiclePlate").isLength({ min: 3 }).withMessage("Invalid Plate Number"),
+    body("vehicleCapacity").isLength({ min: 1 }).withMessage("Invalid Capacity"),
     body("vehicleType")
       .isIn(["car", "motorcycle", "auto"])
       .withMessage("Invalid vehicle"),

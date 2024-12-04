@@ -1,7 +1,14 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
+import { UserDataContext } from "../context/UserContext";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const UserLogin = () => {
+  const navigate = useNavigate();
+  const { user, setUser } = useContext(UserDataContext);
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -11,9 +18,38 @@ const UserLogin = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const loginHandler = (e) => {
+  const loginHandler = async (e) => {
     e.preventDefault();
-    console.log(formData);
+    try {
+      setLoading(true);
+
+      const res = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/users/login`,
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (res.status === 200) {
+        const data = res.data;
+
+        setUser(data.user);
+        localStorage.setItem("token", data.token);
+
+        setFormData({
+          email: "",
+          password: "",
+        });
+        navigate("/home", {
+          replace: true,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,12 +83,21 @@ const UserLogin = () => {
             />
           </div>
           <div>
-            <button
-              type="submit"
-              className="bg-black text-white w-full py-2 rounded-lg hover:bg-[#262626] transition-colors duration-200"
-            >
-              Login
-            </button>
+            {loading ? (
+              <button
+                disabled
+                className="bg-black text-white w-full py-2 rounded-lg hover:bg-[#262626] transition-colors duration-200"
+              >
+                Please Wait...
+              </button>
+            ) : (
+              <button
+                type="submit"
+                className="bg-black text-white w-full py-2 rounded-lg hover:bg-[#262626] transition-colors duration-200"
+              >
+                Login
+              </button>
+            )}
             <p className="w-full text-end text-lg">
               Not a user?{" "}
               <Link

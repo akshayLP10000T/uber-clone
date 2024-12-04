@@ -1,5 +1,7 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { DriverDataContext } from "../context/DriverContext";
+import axios from "axios";
 
 const DriverRegister = () => {
   const [formData, setFormData] = useState({
@@ -7,15 +9,56 @@ const DriverRegister = () => {
     password: "",
     firstName: "",
     lastName: "",
+    vehicleColor: "",
+    vehiclePlate: "",
+    vehicleCapacity: "",
+    vehicleType: "",
   });
+  const navigate = useNavigate();
+  const { driver, setDriver } = React.useContext(DriverDataContext);
+  const [loading, setLoading] = useState(false);
 
   const valueChangeHandler = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const loginHandler = (e) => {
+  const registerHandler = async (e) => {
     e.preventDefault();
-    console.log(formData);
+    try {
+      setLoading(true);
+      const res = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/drivers/register`,
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (res.status === 201) {
+        const data = res.data;
+
+        setDriver(data.user);
+        localStorage.setItem("token", data.token);
+        setFormData({
+          email: "",
+          password: "",
+          firstName: "",
+          lastName: "",
+          vehicleColor: "",
+          vehiclePlate: "",
+          vehicleCapacity: "",
+          vehicleType: "",
+        });
+        navigate("/drivers-home", {
+          replace: true,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+    setLoading(false);
   };
 
   return (
@@ -25,7 +68,7 @@ const DriverRegister = () => {
       </h1>
       <div className="w-full md:px-10 px-5">
         <h1 className="w-full text-center text-4xl font-bold mb-6">Register</h1>
-        <form className="space-y-2" onSubmit={loginHandler}>
+        <form className="space-y-2" onSubmit={registerHandler}>
           <div className="w-full">
             <h2 className="text-xl">Full Name</h2>
             <div className="flex gap-5">
@@ -69,13 +112,67 @@ const DriverRegister = () => {
               className="bg-gray-100 px-5 py-3 focus:outline-none rounded-md w-full"
             />
           </div>
+          <div className="w-full space-y-2">
+            <h2 className="text-xl">Vehicle Information</h2>
+            <div className="flex gap-5">
+              <input
+                type="text"
+                name="vehicleColor"
+                value={formData.vehicleColor}
+                onChange={valueChangeHandler}
+                placeholder="Vehicle Color"
+                className="bg-gray-100 px-5 py-3 focus:outline-none rounded-md w-full"
+              />
+              <input
+                type="text"
+                name="vehiclePlate"
+                value={formData.vehiclePlate}
+                onChange={valueChangeHandler}
+                placeholder="Plate"
+                className="bg-gray-100 px-5 py-3 focus:outline-none rounded-md w-full"
+              />
+            </div>
+            <div className="flex gap-5">
+              <input
+                type="number"
+                max={10}
+                name="vehicleCapacity"
+                value={formData.vehicleCapacity}
+                onChange={valueChangeHandler}
+                placeholder="Vehicle Capacity"
+                className="bg-gray-100 px-5 py-3 focus:outline-none rounded-md w-full"
+              />
+              <select
+                name="vehicleType"
+                value={formData.vehicleType}
+                onChange={valueChangeHandler}
+                className="bg-gray-100 px-5 py-3 focus:outline-none rounded-md w-full"
+              >
+                <option value="" disabled>
+                  Select Vehicle Type
+                </option>
+                <option value="car">Car</option>
+                <option value="motorcycle">Motorcycle</option>
+                <option value="auto">Auto</option>
+              </select>
+            </div>
+          </div>
           <div>
-            <button
-              type="submit"
-              className="bg-black text-white w-full py-2 rounded-lg hover:bg-[#262626] transition-colors duration-200"
-            >
-              Submit
-            </button>
+            {loading ? (
+              <button
+                disabled
+                className="bg-black text-white w-full py-2 rounded-lg hover:bg-[#262626] transition-colors duration-200"
+              >
+                Please Wait...
+              </button>
+            ) : (
+              <button
+                type="submit"
+                className="bg-black text-white w-full py-2 rounded-lg hover:bg-[#262626] transition-colors duration-200"
+              >
+                Submit
+              </button>
+            )}
             <p className="w-full text-end text-lg">
               Already a User?{" "}
               <Link
@@ -90,7 +187,7 @@ const DriverRegister = () => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default DriverRegister
+export default DriverRegister;

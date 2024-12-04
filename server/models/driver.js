@@ -37,13 +37,14 @@ const driverModel = new mongoose.Schema({
         },
         plate: {
             type: String,
-            required: true,
             minlength: [3, "Invalid Number Plate"],
+            required: true,
         },
         capacity: {
             type: Number,
-            required: true,
             min: [1, "Invalid capacity"],
+            max: [10, "Capacity cannot be more than 10"],
+            required: true,
         },
         vehicleType: {
             type: String,

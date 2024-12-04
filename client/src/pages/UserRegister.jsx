@@ -1,21 +1,54 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { UserDataContext } from "../context/UserContext";
 
 const UserRegister = () => {
+  const { user, setUser } = React.useContext(UserDataContext);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     firstName: "",
     lastName: "",
   });
-
+  const [loading, setLoading] = useState(false);
   const valueChangeHandler = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const loginHandler = (e) => {
+  const registerHandler = async (e) => {
     e.preventDefault();
-    console.log(formData);
+    try {
+      setLoading(true);
+      const res = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/users/register`,
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (res.status === 201) {
+        const data = res.data;
+
+        setUser(data.user);
+        localStorage.setItem("token", data.token);
+        setFormData({
+          email: "",
+          password: "",
+          firstName: "",
+          lastName: "",
+        });
+        navigate("/home", {
+          replace: true,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -25,7 +58,7 @@ const UserRegister = () => {
       </h1>
       <div className="w-full md:px-10 px-5">
         <h1 className="w-full text-center text-4xl font-bold mb-6">Register</h1>
-        <form className="space-y-2" onSubmit={loginHandler}>
+        <form className="space-y-2" onSubmit={registerHandler}>
           <div className="w-full">
             <h2 className="text-xl">Full Name</h2>
             <div className="flex gap-5">
@@ -70,12 +103,21 @@ const UserRegister = () => {
             />
           </div>
           <div>
-            <button
-              type="submit"
-              className="bg-black text-white w-full py-2 rounded-lg hover:bg-[#262626] transition-colors duration-200"
-            >
-              Submit
-            </button>
+            {loading ? (
+              <button
+                disabled
+                className="bg-black text-white w-full py-2 rounded-lg hover:bg-[#262626] transition-colors duration-200"
+              >
+                Please Wait...
+              </button>
+            ) : (
+              <button
+                type="submit"
+                className="bg-black text-white w-full py-2 rounded-lg hover:bg-[#262626] transition-colors duration-200"
+              >
+                Submit
+              </button>
+            )}
             <p className="w-full text-end text-lg">
               Already a User?{" "}
               <Link
