@@ -5,9 +5,9 @@ const DriverProtectedWrapper = ({ children }) => {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
-  useEffect(()=>{
-      if (!token) navigate("/drivers/login");
-  }, [])
+  useEffect(() => {
+    if (!token) navigate("/drivers/login");
+  }, [token]);
 
   return <div>{children}</div>;
 };
