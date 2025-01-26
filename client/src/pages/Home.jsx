@@ -4,6 +4,10 @@ import { gsap } from "gsap";
 import LocationSearchPanel from "../components/LocationSearchPanel";
 import { FaUser } from "react-icons/fa";
 import { FaRupeeSign } from "react-icons/fa";
+import ConfirmRide from "../components/ConfirmRide";
+import LocatingDriver from "../components/LocatingDriver.jsx";
+import WaitingForDriver from "../components/WaitingForDriver.jsx";
+import Riding from "./Riding.jsx";
 
 const Home = () => {
   const [fullScreen, setFullScreen] = useState(false);
@@ -13,6 +17,10 @@ const Home = () => {
   });
   const panel = useRef(null);
   const [vehiclePanel, setVehiclePanel] = useState(false);
+  const [confirmRidePanel, setConfirmRidePanel] = useState(false);
+  const [locatingDriver, setLocatingDriver] = useState(false);
+  const [waitingForDriver, setWaitingForDriver] = useState(false);
+  const [ridingPanel, setRidingPanel] = useState(false);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -108,7 +116,10 @@ const Home = () => {
             fullScreen ? "flex-1 px-5 py-2" : "hidden"
           } pt-10`}
         >
-          <LocationSearchPanel setVehiclePanel={setVehiclePanel} setFullScreen={setFullScreen} />
+          <LocationSearchPanel
+            setVehiclePanel={setVehiclePanel}
+            setFullScreen={setFullScreen}
+          />
         </div>
       </div>
       <div
@@ -119,10 +130,17 @@ const Home = () => {
         <div className="bg-white px-5 py-2">
           <div className="flex items-center justify-between">
             <h2 className="md:text-4xl text-2xl font-bold">Choose a vehicle</h2>
-            <FaArrowDown className="cursor-pointer" onClick={()=>setVehiclePanel(false)} size={22} />
+            <FaArrowDown
+              className="cursor-pointer"
+              onClick={() => setVehiclePanel(false)}
+              size={22}
+            />
           </div>
           <div
-            onClick={() => setVehiclePanel(false)}
+            onClick={() => {
+              setVehiclePanel(false);
+              setConfirmRidePanel(true);
+            }}
             className="flex items-center justify-between border-2 border-gray-400 rounded-md hover:bg-gray-100 cursor-pointer transition-color duration-200 md:px-5 px-1 mt-5 py-2"
           >
             <div>
@@ -153,7 +171,10 @@ const Home = () => {
             </div>
           </div>
           <div
-            onClick={() => setVehiclePanel(false)}
+            onClick={() => {
+              setVehiclePanel(false);
+              setConfirmRidePanel(true);
+            }}
             className="flex items-center justify-between border-2 border-gray-400 rounded-md hover:bg-gray-100 cursor-pointer transition-color duration-200 md:px-5 px-1 mt-5 py-2"
           >
             <div>
@@ -184,7 +205,10 @@ const Home = () => {
             </div>
           </div>
           <div
-            onClick={() => setVehiclePanel(false)}
+            onClick={() => {
+              setVehiclePanel(false);
+              setConfirmRidePanel(true);
+            }}
             className="flex items-center justify-between border-2 border-gray-400 rounded-md hover:bg-gray-100 cursor-pointer transition-color duration-200 md:px-5 px-1 mt-5 py-2"
           >
             <div>
@@ -216,6 +240,26 @@ const Home = () => {
           </div>
         </div>
       </div>
+      {confirmRidePanel && (
+        <div className="absolute bottom-0 left-0 w-screen flex flex-col justify-end">
+          <ConfirmRide setConfirmRidePanel={setConfirmRidePanel} setLocatingDriver={setLocatingDriver} />
+        </div>
+      )}
+      {locatingDriver && (
+        <div className="absolute bottom-0 left-0 w-screen flex flex-col justify-end">
+          <LocatingDriver />
+        </div>
+      )}
+      {waitingForDriver && (
+        <div className="absolute bottom-0 left-0 flex flex-col justify-end w-full">
+          <WaitingForDriver />
+        </div>
+      )}
+      {ridingPanel && (
+        <div className="absolute bottom-0 left-0 flex flex-col justify-end w-full">
+          <Riding />
+        </div>
+      )}
     </div>
   );
 };
